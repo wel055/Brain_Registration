@@ -1,0 +1,11 @@
+name: brainreg-learned
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch
+  - numpy
+  - scipy
+  - tifffile
+  - simpleitk
+  - monai

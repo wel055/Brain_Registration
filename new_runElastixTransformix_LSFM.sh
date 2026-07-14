@@ -6,14 +6,14 @@ export FIJI_EXE=/usr/local/Fiji.app/ImageJ-linux64
 export PREPROCESSING_SCRIPT=/data/rmunozca/UClear-OstenRef_RegistrationFiles/preProcessing.py
 export WARPINGIMAGE=*downsampled.tif
 export INPUTFILE=`expr "$DATASET_HOME""$WARPINGIMAGE"`
-echo $INPUTFILE
-echo $DATASET_HOME
+echo "$INPUTFILE"
+echo "$DATASET_HOME"
 
 #$FIJI_EXE $PREPROCESSING_SCRIPT $INPUTFILE
 
 DATASET_NAME=${PWD##*/}
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-export MOVING_IMAGE="$SCRIPT_DIR/CCFv3_25um.tif"
+export MOVING_IMAGE="$SCRIPT_DIR/CCFv3_25um.coronal.tif"
 if [ -z "$1" ]; then
 	echo "Error: No input image provided. Usage: $0 <fixed_image>"
 	exit 1
@@ -23,29 +23,31 @@ export FIXED_IMAGE="$1" #`expr "$DATASET_HOME"/coronal_Ex_445_Ch0_stitched.tif`
 export AFFINEPARFILE="$SCRIPT_DIR/Par0000affine_rmc.txt"
 export BSPLINEPARFILE="$SCRIPT_DIR/Par0000bspline_rmc.txt"
 
-ELASTIX_DIR=/data/software/elastix-5.2.0-linux/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELASTIX_DIR/lib/
-export ELASTIX=$ELASTIX_DIR/bin/elastix
+# ELASTIX_DIR=/data/software/elastix-5.2.0-linux/
+ELASTIX_DIR="$HOME/software/elastix-5.3.1/"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ELASTIX_DIR/lib/"
+export ELASTIX="$ELASTIX_DIR/bin/elastix"
 export ELASTIX_OUTPUT_DIR=elastixOutput
-mkdir $ELASTIX_OUTPUT_DIR
+mkdir -p "$ELASTIX_OUTPUT_DIR"
 
-#$ELASTIX -threads 24 -f $FIXED_IMAGE -m $MOVING_IMAGE -p $AFFINEPARFILE -p $BSPLINEPARFILE -out $ELASTIX_OUTPUT_DIR
+"$ELASTIX" -threads "${ELASTIX_THREADS:-24}" -f "$FIXED_IMAGE" -m "$MOVING_IMAGE" -p "$AFFINEPARFILE" -p "$BSPLINEPARFILE" -out "$ELASTIX_OUTPUT_DIR"
 #$ELASTIX -threads 24 -f $FIXED_IMAGE -m $MOVING_IMAGE -p $AFFINEPARFILE -p $BSPLINEPARFILE -out $ELASTIX_OUTPUT_DIR -t0 t0.txt
 #$ELASTIX -threads 24 -f $MOVING_IMAGE -m $MOVING_IMAGE -p $AFFINEPARFILE -p $BSPLINEPARFILE -out $ELASTIX_OUTPUT_DIR -t0 t0.txt
 #t0_mip3_25um_scaling.txt
 #exit 
 
 cd ./elastixOutput
-CONVERT3D_BIN=/data/software/c3d-1.4.4-Linux-gcc64/bin/c3d
+# Server (Linux) migration: use the c3d provided by the active conda env
+# (config.sh exports C3D_BIN), falling back to whatever is on PATH.
+CONVERT3D_BIN="${C3D_BIN:-$(command -v c3d)}"
 #$CONVERT3D_BIN result.1.mhd -o result.1.tif
 cd -
 
 
 #export ANNOTATIONFILE=/mnt/brainmapstore/rmunozca/YoungGyumMIT/Ex_1_Em_1_destriped_stitched_illuc/warping/Ex_1_Em_1_destriped_stitched_illuc_ch1_0.2Z_p05.tif
-export ANNOTATIONFILE='/home/rmunozca/Documents/scripts/OR_ARA_CCF_25um.tif'
-export ANNOTATIONFILE='/data/shang/data/regpipe/from_Xiaoman/CCFv3_Atlas.tif'
+export ANNOTATIONFILE="$SCRIPT_DIR/CCFv3_Atlas.ccf_2017.coronal.tif"
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Users/rmunozca/Documents/elastix_linux64_v4/lib/
-export TRANSFORMIX=$ELASTIX_DIR/bin/transformix
+export TRANSFORMIX="$ELASTIX_DIR/bin/transformix"
 
 cd elastixOutput*
 
@@ -102,19 +104,18 @@ cd -
 
 mkdir transformixOutput
 export TRANSFORMIXOUTPUT=transformixOutput
-$TRANSFORMIX -threads 16 -in $MOVING_IMAGE -tp ./elastixOutput/TransformParameters_labels.1.txt -out $TRANSFORMIXOUTPUT
+"$TRANSFORMIX" -threads "${TRANSFORMIX_THREADS:-16}" -in "$MOVING_IMAGE" -tp "./elastixOutput/TransformParameters_labels.1.txt" -out "$TRANSFORMIXOUTPUT"
 #$TRANSFORMIX -threads 16 -in $MOVING_IMAGE -tp ./elastixOutput/TransformParameters.1.txt -out $TRANSFORMIXOUTPUT
 
 cd ./transformixOutput
 #OUTPUT_FILE="${FOLDER}_$(basename "$1" .tif)_registered.tif"
 OUTPUT_FILE="$(basename "$1" tif)_registered_CCFv3_template.tif"
-$CONVERT3D_BIN result.nrrd -type ushort -compress -o "$OUTPUT_FILE"
+"$CONVERT3D_BIN" result.nrrd -type ushort -o "$OUTPUT_FILE"
 #rm result.*
 mv result.nrrd "$(basename "$OUTPUT_FILE" .tif).nrrd"
-mv result.tiff "$(basename "$OUTPUT_FILE")"
 cd -
 
-$TRANSFORMIX -threads 16 -in $ANNOTATIONFILE -tp ./elastixOutput/TransformParameters_labels.1.txt -out $TRANSFORMIXOUTPUT
+"$TRANSFORMIX" -threads "${TRANSFORMIX_THREADS:-16}" -in "$ANNOTATIONFILE" -tp "./elastixOutput/TransformParameters_labels.1.txt" -out "$TRANSFORMIXOUTPUT"
 
 cd ./transformixOutput
 #OUTPUT_FILE="${FOLDER}_$(basename "$1" .tif)_registered.tif"
@@ -126,8 +127,7 @@ echo 1
 # ITK ERROR: TIFFImageIO(0x646819054b80): TIFF supports unsigned/signed char, unsigned/signed short, and float
 
 echo 2
-$CONVERT3D_BIN result.nrrd -compress -o "$OUTPUT_FILE"
+"$CONVERT3D_BIN" result.nrrd -o "$OUTPUT_FILE"
 echo 3
 mv result.nrrd "$(basename "$OUTPUT_FILE" .tif).nrrd"
-mv result.tiff "$(basename "$OUTPUT_FILE")"
 cd -

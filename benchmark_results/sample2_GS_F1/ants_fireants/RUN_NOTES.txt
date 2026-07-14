@@ -1,0 +1,13 @@
+Brain registration benchmark
+Run ID: run_20260712_011131
+Completed: Sun Jul 12 01:29:27 AM EDT 2026
+Scratch root: /home/wel4014/brain_registration/results/20260220_11_25_58_AZ4_DB6_P60_GS_F1_A_Raw_Transferred/.scratch/run_20260712_011131
+Final root: /home/wel4014/brain_registration/results/20260220_11_25_58_AZ4_DB6_P60_GS_F1_A_Raw_Transferred/run_20260712_011131
+Fixed sample: /home/wel4014/brain_registration/results/20260220_11_25_58_AZ4_DB6_P60_GS_F1_A_Raw_Transferred/stitched/20260220_11_25_58_AZ4_DB6_P60_GS_F1_A_Raw_Transferred_Ex_488_Ch1_fullres_25um.tif
+Template: /home/wel4014/brain_registration/CCFv3_25um.coronal.tif
+Annotation atlas: /home/wel4014/brain_registration/CCFv3_Atlas.ccf_2017.coronal.tif
+Evaluation stride: 4
+
+All registration and evaluation I/O ran on the external SSD. The final NAS
+copy excludes ANTs temporary files, emlddmm input work files, and matplotlib
+cache files. The full intermediates remain in the scratch root above.
