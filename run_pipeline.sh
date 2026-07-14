@@ -27,7 +27,7 @@
 #   --eval-stride N       evaluation downsample stride    (default: 4)
 #   --methods LIST        comma list of methods to run    (default: elastix,ants,fireants,emlddmm)
 #                         (fireants = GPU-accelerated ANTs; runs in its own env)
-#   --emlddmm-iters JSON  emlddmm iterations per scale    (default: [30, 15])
+#   --emlddmm-iters JSON  emlddmm iterations per scale    (default: [30, 20, 15]; 3 scales 16x/8x/4x)
 #   --fireants-iters CSV  fireants iters per scale        (default: 200,100,50)
 #   --orient MODE         ccf | none (axis reorient)      (default: ccf)
 #   --flip AXES           axes to flip, CCF order 0,1,2   (default: none)
@@ -54,7 +54,7 @@ TARGET_UM="25"
 THREADS="32"
 EVAL_STRIDE="4"
 METHODS="elastix,ants,fireants,emlddmm"
-EMLDDMM_ITERS="[30, 15]"
+EMLDDMM_ITERS="[30, 20, 15]"
 FIREANTS_ITERS="200,100,50"
 ORIENT="ccf"
 FLIP=""

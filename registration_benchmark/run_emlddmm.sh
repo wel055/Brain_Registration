@@ -31,12 +31,12 @@ python "$VOLUME_IO" tiff-to-vtk "$ATLAS_IMAGE" "$ATLAS_VTK" --kind labels
 
 cat > "$CONFIG_JSON" <<JSON
 {
-  "downI": [[16, 16, 16], [8, 8, 8]],
-  "downJ": [[16, 16, 16], [8, 8, 8]],
-  "n_iter": ${EMLDDMM_N_ITER:-[30, 15]},
-  "v_start": [15, 5],
-  "eA": [10.0, 5.0],
-  "ev": [1.0, 0.5],
+  "downI": [[16, 16, 16], [8, 8, 8], [4, 4, 4]],
+  "downJ": [[16, 16, 16], [8, 8, 8], [4, 4, 4]],
+  "n_iter": ${EMLDDMM_N_ITER:-[30, 20, 15]},
+  "v_start": [15, 10, 5],
+  "eA": [10.0, 5.0, 2.5],
+  "ev": [1.0, 0.5, 0.25],
   "auto_stepsize_A": 5,
   "auto_stepsize_v": 5,
   "a": null,
